@@ -1,1 +1,7 @@
 /.lake
+
+# Participant scratch space: ignore everything except the README
+# explaining its purpose, so each participant can work here without
+# creating merge conflicts.
+/TuftsLeanSeminar/Work/*
+!/TuftsLeanSeminar/Work/README.md
