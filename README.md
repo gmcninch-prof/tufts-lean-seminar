@@ -4,9 +4,10 @@ Lean 4 / Mathlib project for the Tufts Lean seminar.
 
 ## Setup
 
-1. **Install `elan`** (the Lean version manager), if you don't already have
-   it. It will fetch the correct Lean toolchain for this project
-   automatically.
+1. **Install `elan` (the Lean version manager) and the
+   [VS Code Lean 4 extension](https://marketplace.visualstudio.com/items?itemName=leanprover.lean4).**
+   You might have done this already. `elan` will fetch the correct Lean
+   toolchain for this project automatically.
 
    ```sh
    curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh
@@ -35,10 +36,9 @@ Lean 4 / Mathlib project for the Tufts Lean seminar.
    its dependencies, which saves you from having to compile them locally
    (this can take a very long time otherwise).
 
-4. **Open the project in VS Code** with the
-   [Lean 4 extension](https://marketplace.visualstudio.com/items?itemName=leanprover.lean4)
-   installed, and open the `tufts-lean-seminar` folder directly (not just a
-   single file) so the extension can find the project's `lakefile.toml`.
+4. **Open the project in VS Code.** Open the `tufts-lean-seminar` folder
+   directly (not just a single file) so the Lean 4 extension can find the
+   project's `lakefile.toml`.
 
 ## Where to work
 
