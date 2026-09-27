@@ -153,8 +153,10 @@ variable (f : β → α)
 -- that the terms in the equalities are `defeq`
 -- so you can solve them with `rfl`
 
-example (A B : Set α) : f ⁻¹' (A ∩ B) = f ⁻¹' A ∩ f ⁻¹' B := by
-  sorry
+example (A B : Set α) : f ⁻¹' (A ∩ B) = f ⁻¹' A ∩ f ⁻¹' B := rfl
+
+-- by
+--   sorry
   
 example (A B : Set α) : f ⁻¹' (A ∪ B) = f ⁻¹' A ∪ f ⁻¹' B := by
   sorry
@@ -165,8 +167,18 @@ example (A : Set α) : f ⁻¹' Aᶜ = (f ⁻¹' A)ᶜ := by
 -- Membership in an image is existential: `y ∈ f '' S ↔ ∃ x, x ∈ S ∧ f x = y`.
 -- So: `rcases ⟨x, hx, rfl⟩` to use it, `⟨x, hx, rfl⟩` or `use x` to prove it.
 example (S T : Set β) : f '' (S ∪ T) = f '' S ∪ f '' T := by
-  sorry
-  
+  ext y
+  constructor
+  · rintro ⟨x,hx,rfl⟩
+    rcases hx with hxs | hxt 
+    · apply Or.inl
+      exact mem_image_of_mem f hxs 
+    · apply Or.inr
+      exact mem_image_of_mem f hxt 
+  · rintro (⟨y,hy,rfl⟩  | ⟨y,hy,rfl⟩)
+    · exact ⟨y,Or.inl hy, rfl⟩
+    · exact ⟨y,Or.inr hy, rfl⟩
+
 example (S T : Set β) : f '' (S ∩ T) ⊆ f '' S ∩ f '' T := by
   sorry
 
