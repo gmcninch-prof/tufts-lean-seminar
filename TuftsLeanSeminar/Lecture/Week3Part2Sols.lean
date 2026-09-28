@@ -237,6 +237,8 @@ example (hf : Function.Injective f) (S T : Set β) :
 
 -- ★ A counterexample without injectivity.
 -- Hint: take `f := fun _ => 0`, `S := {0}`, `T := {1}`.
+
+-- solution 1
 example : ∃ (g : ℕ → ℕ) (S T : Set ℕ),
     ¬ (g '' S ∩ g '' T ⊆ g '' (S ∩ T)) := by
   let f : ℕ → ℕ := fun _ => 0
@@ -260,13 +262,15 @@ example : ∃ (g : ℕ → ℕ) (S T : Set ℕ),
   rw [image_empty] at h0ST 
   exact h0ST 
     
-
+    
+-- solution 2
 example : ∃ (g : ℕ → ℕ) (S T : Set ℕ),
     ¬ (g '' S ∩ g '' T ⊆ g '' (S ∩ T)) := by
   refine ⟨fun _ => 0, {0}, {1}, ?_⟩
   intro h
   rcases h ⟨⟨0,rfl,rfl⟩, ⟨1,rfl,rfl⟩⟩ with ⟨n,⟨hn0,hn1⟩,_⟩
-  
+  have : 0 = 1 := hn0.symm.trans hn1
+  exact absurd this (by decide)
   
   
 
