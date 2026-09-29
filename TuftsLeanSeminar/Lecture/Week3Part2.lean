@@ -64,7 +64,7 @@ example (A B : Set α) (x : α) : x ∈ A ∪ B ↔ x ∈ A ∨ x ∈ B := Iff.r
 
 example (A B : Set α) : A ⊆ B ↔ ∀ x, x ∈ A → x ∈ B := Iff.rfl
 
-example : (Set.univ : Set α) = {x | True} := rfl
+example : (Set.univ : Set α) = {_x:α | True} := rfl
 
 example (p q : α → Prop) (h : (s : α) → p s → q s)
     : { s | p s } ⊆ { s | q s }   := by 

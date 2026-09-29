@@ -54,7 +54,7 @@ Once you have a proof by hand, feel free to see what `aesop` or
 -/
 
 
-/-  ## intro membership is just the predicate -/
+/-  ## rintro membership is just the predicate -/
 
 example (p : α → Prop) (a : α) : a ∈ {x | p x} ↔ p a := Iff.rfl
 
@@ -64,15 +64,16 @@ example (A B : Set α) (x : α) : x ∈ A ∪ B ↔ x ∈ A ∨ x ∈ B := Iff.r
 
 example (A B : Set α) : A ⊆ B ↔ ∀ x, x ∈ A → x ∈ B := Iff.rfl
 
-example : (Set.univ : Set α) = { x | True} := rfl
+example : (Set.univ : Set α) = { _x:α | True} := rfl
 
 example (p q : α → Prop) (h : (s : α) → p s → q s)
     : { s | p s } ⊆ { s | q s }   := by 
-  sorry
+  rintro s ks
+  exact h s ks
 
 -- Worked example.  Read it, step through it, see how the goal changes.
 example (A B : Set α) : A ∩ B ⊆ A := by
-  intro x hx
+  rintro x hx
   rcases hx with ⟨ha,hb⟩
   exact ha
 
@@ -83,29 +84,45 @@ example (A B : Set α) : A ∩ B ⊆ A := by
 -/
 
 example (A B : Set α) : A ⊆ A ∪ B := by
-  sorry
+  rintro _ ha
+  apply Or.inl
+  exact ha
 
 example (A B : Set α) : A ∩ B ⊆ B := by
-  sorry
+  rintro x ⟨ha,hb⟩
+  exact hb
 
 example (A B : Set α) : A ∩ B ⊆ A ∪ B := by
-  sorry
+  rintro x ⟨ha,_⟩
+  apply Or.inl
+  exact ha
 
 example (A B C : Set α) (hAB : A ⊆ B) (hBC : B ⊆ C) : A ⊆ C := by
-  sorry
+  rintro _ ha
+  apply hBC 
+  apply hAB
+  exact ha
 
 example (A B C : Set α) (hB : A ⊆ B) (hC : A ⊆ C) : A ⊆ B ∩ C := by
-  sorry
+  rintro a ha
+  exact ⟨hB ha,hC ha⟩
 
 -- Hint: the hypothesis `x ∈ A ∪ B` is an `∨`; split on it.
 example (A B C : Set α) (hA : A ⊆ C) (hB : B ⊆ C) : A ∪ B ⊆ C := by
-  sorry
+  rintro a (haA | haB) 
+  · exact hA haA
+  · exact hB haB
+  
 
 -- ★ Note `x ∈ A \ B` means `x ∈ A ∧ x ∉ B`.
 example (A B C : Set α) : (A \ B) \ C ⊆ A \ (B ∪ C) := by
-  sorry
-
-
+  intro a ⟨ ⟨h0,h1⟩ , h2 ⟩
+  constructor
+  · exact h0
+  · rintro (hb | hc)
+    · exact absurd hb h1
+    · exact absurd hc h2
+    
 /-  =======================================================================
     Part 2: equality is two inclusions (use `ext`, `constructor`)
     =======================================================================
@@ -121,23 +138,78 @@ example (A B : Set α) : A ∩ B = B ∩ A := by
     exact ⟨hA, hB⟩
 
 example (A B : Set α) : A ∪ B = B ∪ A := by
-  sorry
+  ext x
+  constructor
+  · rintro (ha | hb)
+    · exact Or.inr ha
+    · exact Or.inl hb
+  · rintro (hb | ha)
+    · exact Or.inr hb
+    · exact Or.inl ha
 
 -- The first real case split.
 example (A B C : Set α) : A ∩ (B ∪ C) = (A ∩ B) ∪ (A ∩ C) := by
-  sorry
-
+  ext x
+  constructor
+  · rintro ⟨ha, hbc⟩
+    rcases hbc with kb | kc
+    · exact Or.inl ⟨ ha,kb ⟩
+    · exact Or.inr ⟨ ha,kc ⟩
+  · rintro (hab | hac)
+    · constructor
+      · exact hab.1
+      · exact Or.inl hab.2 
+    · constructor
+      · exact hac.1
+      · exact Or.inr hac.2
+  
+  
 example (A B C : Set α) : A ∪ (B ∩ C) = (A ∪ B) ∩ (A ∪ C) := by
-  sorry
+  ext x
+  constructor
+  · rintro (ha | ⟨hb, hc⟩)
+    · exact ⟨ Or.inl ha, Or.inl ha⟩ 
+    · exact ⟨ Or.inr hb, Or.inr hc⟩
+  · rintro  ⟨ (ha1 | hb), (ha2 | hc) ⟩
+    · exact Or.inl ha1
+    · exact Or.inl ha1
+    · exact Or.inl ha2
+    · exact Or.inr ⟨hb,hc⟩
+    
 
 -- ★ This one needs classical logic: try `by_cases hA : x ∈ A`.
 example (A B : Set α) : (A ∩ B)ᶜ = Aᶜ ∪ Bᶜ := by
-  sorry
+  ext x
+  constructor
+  · rintro h
+    by_cases hA : x ∈ A
+    · apply Or.inr 
+      intro hB
+      exact h ⟨hA,hB⟩
+    · apply Or.inl 
+      intro k
+      exact hA k
+  · rintro (hA | hB) ⟨ka,kb⟩ 
+    · exact hA ka
+    · exact hB kb
+
 
 -- ★ Inclusion can be expressed with an equation.
 example (A B : Set α) : A ⊆ B ↔ A ∩ B = A := by
-  sorry
-
+  constructor
+  · intro h
+    ext x
+    constructor
+    · rintro ⟨hxA,_⟩
+      exact hxA
+    · rintro k
+      exact ⟨k, h k⟩
+  · intro h x hxA
+    have hx : x ∈ A ∩ B := by
+      rw [h]
+      exact hxA
+    exact hx.2 
+    
 
 /-! ## Act 3: functions enter (`⁻¹'` and `''`) -/
 
@@ -155,14 +227,10 @@ variable (f : β → α)
 
 example (A B : Set α) : f ⁻¹' (A ∩ B) = f ⁻¹' A ∩ f ⁻¹' B := rfl
 
--- by
---   sorry
-  
-example (A B : Set α) : f ⁻¹' (A ∪ B) = f ⁻¹' A ∪ f ⁻¹' B := by
-  sorry
+example (A B : Set α) : f ⁻¹' (A ∪ B) = f ⁻¹' A ∪ f ⁻¹' B := rfl
 
-example (A : Set α) : f ⁻¹' Aᶜ = (f ⁻¹' A)ᶜ := by
-  sorry
+example (A : Set α) : f ⁻¹' Aᶜ = (f ⁻¹' A)ᶜ := rfl
+
 
 -- Membership in an image is existential: `y ∈ f '' S ↔ ∃ x, x ∈ S ∧ f x = y`.
 -- So: `rcases ⟨x, hx, rfl⟩` to use it, `⟨x, hx, rfl⟩` or `use x` to prove it.
@@ -245,7 +313,7 @@ example : ∃ (g : ℕ → ℕ) (S T : Set ℕ),
   let S : Set ℕ := {0}
   let T : Set ℕ := {1}
   use f,S,T
-  intro h
+  rintro h
   have h0S : 0 ∈ f '' S := by
     exact ⟨0,rfl,rfl⟩ 
   have h0T : 0 ∈ f '' T := by
@@ -267,7 +335,7 @@ example : ∃ (g : ℕ → ℕ) (S T : Set ℕ),
 example : ∃ (g : ℕ → ℕ) (S T : Set ℕ),
     ¬ (g '' S ∩ g '' T ⊆ g '' (S ∩ T)) := by
   refine ⟨fun _ => 0, {0}, {1}, ?_⟩
-  intro h
+  rintro h 
   rcases h ⟨⟨0,rfl,rfl⟩, ⟨1,rfl,rfl⟩⟩ with ⟨n,⟨hn0,hn1⟩,_⟩
   have : 0 = 1 := hn0.symm.trans hn1
   exact absurd this (by decide)
