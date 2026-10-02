@@ -339,8 +339,6 @@ example : ∃ (g : ℕ → ℕ) (S T : Set ℕ),
   rcases h ⟨⟨0,rfl,rfl⟩, ⟨1,rfl,rfl⟩⟩ with ⟨n,⟨hn0,hn1⟩,_⟩
   have : 0 = 1 := hn0.symm.trans hn1
   exact absurd this (by decide)
-  
-  
 
 /-! ## Capstone: image and preimage are adjoint -/
 
@@ -351,13 +349,25 @@ example (S : Set β) (B : Set α) : f '' S ⊆ B ↔ S ⊆ f ⁻¹' B := by
     use s 
   · rintro hS x ⟨s,hs,rfl⟩
     exact hS hs
-    
-
-    
-  
 
 -- ★★ Injectivity, characterized by a property of sets.
 -- Hint for `←`: given `f x = f y`, apply the hypothesis to `S = {x}`, `T = {y}`,
 -- and show `f x ∈ f '' {x} ∩ f '' {y}`.
 example : Function.Injective f ↔ ∀ S T : Set β, f '' (S ∩ T) = f '' S ∩ f '' T := by
-  sorry
+  constructor
+  · rintro h S T 
+    ext x
+    constructor
+    · rintro ⟨u,⟨hus,hut⟩,rfl⟩
+      constructor
+      <;> use u
+    · rintro ⟨⟨s,hxs,kxs⟩,⟨t,hxt,kxt⟩⟩
+      have l : s = t := h (kxs.trans kxt.symm)
+      subst l
+      use s
+      exact ⟨⟨hxs,hxt⟩,kxs⟩
+  · rintro h 
+  
+      
+      
+          
