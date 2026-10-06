@@ -367,6 +367,19 @@ example : Function.Injective f ↔ ∀ S T : Set β, f '' (S ∩ T) = f '' S ∩
       use s
       exact ⟨⟨hxs,hxt⟩,kxs⟩
   · rintro h 
+    intro x y k
+    by_contra hxy
+    let S : Set β := { x }
+    let T : Set β := { y }
+    have : { x } ∩ { y } = (∅:Set β) := by 
+      exact singleton_inter_of_notMem hxy
+    have hSTempty : ∅ = f '' S ∩ f '' T := by
+      rw [ ← h S T ]
+      unfold S T
+      rw [ this ]
+      exact empty_eq_image.mpr rfl 
+    sorry
+      
   
       
       
