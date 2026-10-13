@@ -27,7 +27,7 @@ structure Point where
 -- Lean uses the function `toString` to produce string representations of various data types
 -- eg integers, or lists of rational numbers
 #eval toString (5 : ℤ)        -- "5"
-#eval toString ([1, 2, 1/3] : List ℚ)        -- "[1, 2, 1/3]"
+#eval toString ([1, 2, 1/3] : List ℚ)        -- "[1, 2, 1/3]"1
 
 -- we can create a term of type `Point` as follows:
 
