@@ -1,5 +1,5 @@
 /-!
-# Inductive types
+# Inductive types and "induction"
 -/
 
 -- Let's define our own version of the natural numbers, via Peano.
@@ -12,8 +12,8 @@ deriving Repr
 
 def two : MyNat := .succ (.succ .zero)
 
--- when you define an inductive type, lean automatically creates a
--- _recursor_ for the type. 
+-- when you define an inductive type, lean automatically creates
+-- something called a _recursor_ for the type.
 
 -- In our case, the recursor is named `MyNat.rec`
 
@@ -46,17 +46,19 @@ def double : MyNat → MyNat
   | .zero   => .zero
   | .succ n => .succ (.succ (double n))
 
--- Now let's use the recursor to define the doubling function
+-- Now let's instead use the recursor to define the doubling function
 
 
 -- Look at the signature of `MyNat.rec` above. The result is `motive t` 
 
 -- `motive t` is the *type* of the thing we want to produce at `t`.
 -- Here the answer is: we want to produce a natural number regardless
--- of what `t` is, so the motive is the constant function `fun _ =>
--- MyNat`.
+-- of what `t` is, so the motive is the constant function 
 
--- We need a term of type `motive MyNat.zero`.
+-- `fun _ = MyNat`.
+
+-- The next argument to MyNat.rec requires us to give a term of type
+-- `motive MyNat.zero`.
 
 def doubleZero : MyNat := .zero
 
@@ -76,39 +78,52 @@ noncomputable def double' : MyNat → MyNat :=
   MyNat.rec (motive := fun _ => MyNat) doubleZero doubleStep
   
   
--- let's use our function
+-- let's use our function(s)
 
 #reduce double' two
+
+#reduce double two
 
 #eval double two
 -- #eval double' two
 
 
+/- Now let's observe some general theorems about this recursor -/
+
 section
-variable {α : Type} (a : α) (g : MyNat → α → α)
+
+variable {α : Type} 
+         (a : α) 
+         (g : MyNat → α → α)
 
 -- existence: the recursor gives a solution, and the equations hold by computation
-example : MyNat.rec (motive := fun _ => α) a g .zero = a := rfl
+example : 
+    MyNat.rec (motive := fun _ => α) a g .zero = a := 
+  rfl
+
 example (n : MyNat) :
-    MyNat.rec (motive := fun _ => α) a g n.succ
-      = g n (MyNat.rec (motive := fun _ => α) a g n) := rfl
+    MyNat.rec (motive := fun _ => α) a g n.succ 
+    = g n (MyNat.rec (motive := fun _ => α) a g n) := 
+  rfl
 
 -- uniqueness: any two solutions agree, by induction
-theorem rec_unique (f h : MyNat → α)
-    (hf0 : f .zero = a) (hfs : ∀ n, f n.succ = g n (f n))
-    (h0 : h .zero = a) (hs : ∀ n, h n.succ = g n (h n)) :
-    ∀ n, f n = h n := by
+theorem rec_unique (f₁ f₂ : MyNat → α)
+    (hf₁ : f₁ .zero = a) (hf₁s : ∀ n, f₁ n.succ = g n (f₁ n))
+    (hf₂ : f₂ .zero = a) (hf₂s : ∀ n, f₂ n.succ = g n (f₂ n)) :
+    ∀ n, f₁ n = f₂ n := by
   intro n
   induction n with
-  | zero => rw [hf0, h0]
-  | succ n ih => rw [hfs, hs, ih]
-end
+  | zero => rw [hf₂, hf₁]
+  | succ n ih => rw [hf₁s, hf₂s, ih]
+
+
+end  -- end the `section`
 
 
 -- --------------------------------------------------------------------------------
 
 
--- we can define addition of our `MyNat` type.
+-- we can define addition for our `MyNat` type.
 
 
 def add (m : MyNat) : MyNat → MyNat
@@ -117,7 +132,7 @@ def add (m : MyNat) : MyNat → MyNat
 
 -- we are going to give a few proofs that `0 + n = n`.
 
--- and we can use the recursor:
+-- we can use the recursor:
 
 theorem zero_add (n : MyNat) : add .zero n = n :=
   MyNat.rec (motive := fun n => add .zero n = n)
@@ -138,10 +153,10 @@ theorem zero_add' (n : MyNat) : add .zero n = n := by
   match n with
   | .zero => rfl
   | .succ n => 
-      have : add .zero n = n :=  zero_add' n
-      exact congrArg MyNat.succ this
+      have ih : add .zero n = n :=  zero_add' n
+      exact congrArg MyNat.succ ih
 
--- notice: `congrArg MyNat.succ this` has type
+-- notice: `congrArg MyNat.succ ih` has type
 --   .succ (add .zero n) = .succ n
 -- while the goal is
 --   add .zero n.succ = n.succ
@@ -158,6 +173,8 @@ theorem zero_add' (n : MyNat) : add .zero n = n := by
 -- prove strong induction from ordinary induction.
 
 -- that is what you see in `#print zero_add'`
+
+-- finally, let's use the `induction` tactic:
 
 theorem zero_add'' (n : MyNat) : add .zero n = n := by
   induction n with
@@ -200,6 +217,7 @@ theorem oops : False := by
 
 #print oops
 
+-- the output is:
 -- theorem oops : ∀ (bad : Nat → Nat), (∀ (n : Nat), bad n = bad n + 1) → False :=
 -- fun bad bad_eq ↦
 --   have this := bad_eq 0;
@@ -246,12 +264,17 @@ end
 
 -- ================================================================================-
 
--- Trees
+/- A more complicated inductive type, still permits induction. -/
+
+-- (binary) Trees
 
 inductive Tree where
   | leaf : Tree 
   | node : Tree → Tree → Tree
 deriving Repr, DecidableEq
+
+-- let's make some utility functions for construction of certain kinds
+-- of trees:
 
 def leftSpine (n : Nat) : Tree := 
   match n with
@@ -272,7 +295,17 @@ def fullTree (n : Nat) : Tree :=
 
 def ex : Tree := .node (leftSpine 2) (rightSpine 3)
 
+#eval ex
+
+-- output:
+-- Tree.node
+--   (Tree.node (Tree.node (Tree.leaf) (Tree.leaf)) (Tree.leaf))
+--   (Tree.node (Tree.leaf) 
+--              (Tree.node (Tree.leaf) 
+--                (Tree.node (Tree.leaf) (Tree.leaf)))) 
+
 #check @Tree.rec
+
 -- {motive : Tree → Sort u}
 --   → motive leaf
 --   → ((l r : Tree) → motive l → motive r → motive (node l r))
@@ -305,19 +338,12 @@ theorem mirror_fulltree (n : Nat) : mirror (fullTree n) = fullTree n := by
   | succ n ih => simp [ fullTree, mirror, ih ]
 
 
-def fullTree (n : Nat) : Tree :=
-  match n with
-  | 0 => .leaf
-  | n + 1 => .node (fullTree n) (fullTree n)
-
-
 def size_of (t : Tree) : Nat := 
   match t with
   | .leaf => 1
   | .node l r => (size_of l) + (size_of r) + 1
 
 #eval size_of (fullTree 1)
-
 
 theorem fullSize (n : Nat) : size_of (fullTree n) + 1 = 2 ^ (n + 1) := by
   induction n with
