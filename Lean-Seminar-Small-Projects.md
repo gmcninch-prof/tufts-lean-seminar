@@ -101,9 +101,6 @@ example (r : ℝ) : (Term.mul .var (.const r)).eval 2 = 2 * r := by
   sorry
 ```
 
-2. Write `x² + 3x` as a `Term`, and compute its `diff` by hand. Notice
-   the junk like `mul (const 0) …`.
-
 2. Write `x² + 3x` as a `Term` `t`. Without running Lean, work out the `Term`
    that `diff t` returns by unfolding the definition of `diff`. Then check
    your answer: 
@@ -135,10 +132,15 @@ example (r : ℝ) : (Term.mul .var (.const r)).eval 2 = 2 * r := by
   commutative ring `R`, so you can `#eval` over `ℚ`. Correctness still
   lives over `ℝ`.
 
-- **Exponential:** add a constructor `exp`. Where should the
-  requirement that `R` has an exponential live: on `eval`, or as an
-  instance argument stored in the constructor (`| exp [HasExp R] :
-  Term R → Term R`)? Try one and report.
+- **Exponential:** add a constructor `exp`.
+
+	You might write a typeclass `HasExp R` and use `mathlib` functions
+	to give instances for `HasExp ℝ` and `HasExp ℂ`.
+
+    Where should the requirement that `R` has an exponential live: on
+    `eval`, or as an instance argument stored in a constructor for
+    `Term` like(`| exp [HasExp R] : Term R → Term R`)? Try one and
+    report.
 
 - **Several variables:** replace `var` with `var : ℕ → Term`, evaluate
   against an environment `ℕ → ℝ`, and state correctness for partial
