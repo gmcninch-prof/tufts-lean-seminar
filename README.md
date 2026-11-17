@@ -6,7 +6,7 @@ Lean 4 / Mathlib project for the
 
 ## Small projects, for the remainder of the seminar
 
-   [small project](/Lean Seminar Small Projects.md)
+- [small project](Lean Seminar Small Projects.md)
 
 ## Materials for the seminar
 
